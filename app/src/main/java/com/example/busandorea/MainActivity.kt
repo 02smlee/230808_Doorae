@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.busandorea.databinding.ActivityMainBinding
+import com.example.busandorea.fragment.CurrentMap
 import com.example.busandorea.fragment.PublicFragment
 import com.example.busandorea.fragment.StampeFragment
 import com.example.busandorea.fragment.TourListFragment
@@ -31,8 +32,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     class MyFragmentPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
         val fragments: List<Fragment>
 
+        // CurrentMap 프레그먼트 추가
         init {
-            fragments = listOf(TourListFragment(), PublicFragment(), StampeFragment())
+            fragments = listOf(TourListFragment(), PublicFragment(), StampeFragment(), CurrentMap())
         }
 
         override fun getItemCount(): Int = fragments.size
@@ -70,6 +72,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 0 -> tab.text = "추천여행지"
                 1 -> tab.text = "공공데이터"
                 2 -> tab.text = "스템프"
+                3 -> tab.text = "나의 위치"
             }
         }.attach()
 
