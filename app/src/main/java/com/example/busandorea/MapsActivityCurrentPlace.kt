@@ -25,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
@@ -39,19 +40,19 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     private var map: GoogleMap? = null
     private var cameraPosition: CameraPosition? = null
 
-    // The entry point to the Places API.
+    // Places API에 대한 진입점입니다.
     private lateinit var placesClient: PlacesClient
 
-    // The entry point to the Fused Location Provider.
+    // Fused Location Provider에 대한 진입점입니다.
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
-    // A default location (Sydney, Australia) and default zoom to use when location permission is
-    // not granted.
+    // 위치 권한이 있을 때 사용할 기본 위치(호주 시드니) 및 기본 확대/축소
+    // 허용되지 않았습니다.
     private val defaultLocation = LatLng(-33.8523341, 151.2106085)
     private var locationPermissionGranted = false
 
-    // The geographical location where the device is currently located. That is, the last-known
-    // location retrieved by the Fused Location Provider.
+    // 장치가 현재 위치한 지리적 위치. 즉, 마지막으로 알려진
+    // Fused Location Provider에서 검색한 위치입니다.
     private var lastKnownLocation: Location? = null
     private var likelyPlaceNames: Array<String?> = arrayOfNulls(0)
     private var likelyPlaceAddresses: Array<String?> = arrayOfNulls(0)
@@ -63,7 +64,7 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
 
         // [START_EXCLUDE silent]
-        // Retrieve location and camera position from saved instance state.
+        //  저장된 인스턴스 상태에서 위치 및 카메라 위치를 검색합니다.
         // [START maps_current_place_on_create_save_instance_state]
         if (savedInstanceState != null) {
             lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION)
@@ -72,15 +73,15 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
         // [END maps_current_place_on_create_save_instance_state]
         // [END_EXCLUDE]
 
-        // Retrieve the content view that renders the map.
+        // 지도를 렌더링하는 콘텐츠 보기를 검색합니다.
         setContentView(R.layout.activity_maps)
 
         // [START_EXCLUDE silent]
-        // Construct a PlacesClient
+        //PlacesClient 구성
         Places.initialize(applicationContext, "BuildConfig.MAPS_API_KEY")
         placesClient = Places.createClient(this)
 
-        // Construct a FusedLocationProviderClient.
+        //FusedLocationProviderClient를 구성합니다.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Build the map.
@@ -94,7 +95,7 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_on_create]
 
     /**
-     * Saves the state of the map when the activity is paused.
+     * 활동이 일시 중지되었을 때 지도의 상태를 저장합니다.
      */
     // [START maps_current_place_on_save_instance_state]
     override fun onSaveInstanceState(outState: Bundle) {
@@ -117,9 +118,9 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * Handles a click on the menu option to get a place.
-     * @param item The menu item to handle.
-     * @return Boolean.
+     * 장소를 얻기 위해 메뉴 옵션의 클릭을 처리합니다.
+     * @param item 처리할 메뉴 항목.
+     * @return Boolean
      */
     // [START maps_current_place_on_options_item_selected]
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -131,12 +132,24 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_on_options_item_selected]
 
     /**
-     * Manipulates the map when it's available.
-     * This callback is triggered when the map is ready to be used.
+     사용 가능한 경우 지도를 조작합니다.
+     * 이 콜백은 맵을 사용할 준비가 되면 트리거됩니다.
      */
     // [START maps_current_place_on_map_ready]
     override fun onMapReady(map: GoogleMap) {
         this.map = map
+
+        // 위치 권한을 확인하고 권한이 있을 경우에만 현재 위치 표시
+        getLocationPermission()
+
+        // 위치 권한이 있으면 현재 위치 정보 가져오기
+        if (locationPermissionGranted) {
+            getDeviceLocation()
+        }
+
+        // 마커 추가
+
+
 
         // [START_EXCLUDE]
         // [START map_current_place_set_info_window_adapter]
@@ -159,6 +172,8 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                 return infoWindow
             }
         })
+
+
         // [END map_current_place_set_info_window_adapter]
 
         // Prompt the user for permission.
@@ -174,7 +189,7 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_on_map_ready]
 
     /**
-     * Gets the current location of the device, and positions the map's camera.
+     * 기기의 현재 위치를 가져오고 지도의 카메라 위치를 지정합니다.
      */
     // [START maps_current_place_get_device_location]
     @SuppressLint("MissingPermission")
@@ -191,6 +206,16 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                         // Set the map's camera position to the current location of the device.
                         lastKnownLocation = task.result
                         if (lastKnownLocation != null) {
+                            // 여기서 LatLng 객체 생성
+                            val currentLocation = LatLng(lastKnownLocation!!.latitude, lastKnownLocation!!.longitude)
+                            val marker = map?.addMarker(
+                                MarkerOptions()
+                                    .position(currentLocation)
+                                    .title("나의 현재 위치")
+                                    .snippet("현재 위치입니다.")
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                            )
+
                             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                 LatLng(lastKnownLocation!!.latitude,
                                     lastKnownLocation!!.longitude), DEFAULT_ZOOM.toFloat()))
@@ -211,13 +236,13 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_get_device_location]
 
     /**
-     * Prompts the user for permission to use the device location.
+     * 장치 위치를 사용할 수 있는 권한을 사용자에게 묻습니다.
      */
     // [START maps_current_place_location_permission]
     private fun getLocationPermission() {
         /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
+         * 위치 권한을 요청하여 위치를 알 수 있습니다.
+         * 장치. 권한 요청의 결과는 콜백에 의해 처리되며,
          * onRequestPermissionsResult.
          */
         if (ContextCompat.checkSelfPermission(this.applicationContext,
@@ -232,7 +257,7 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_location_permission]
 
     /**
-     * Handles the result of the request for location permissions.
+     * 위치 권한 요청 결과를 처리합니다.
      */
     // [START maps_current_place_on_request_permissions_result]
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -255,8 +280,8 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_on_request_permissions_result]
 
     /**
-     * Prompts the user to select the current place from a list of likely places, and shows the
-     * current place on the map - provided the user has granted location permission.
+     * 가능성이 있는 장소 목록에서 현재 장소를 선택하라는 메시지를 표시하고
+     * 지도의 현재 위치 - 사용자가 위치 권한을 부여한 경우.
      */
     // [START maps_current_place_show_current_place]
     @SuppressLint("MissingPermission")
@@ -301,18 +326,18 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                         }
                     }
 
-                    // Show a dialog offering the user the list of likely places, and add a
-                    // marker at the selected place.
+                    // 사용자에게 가능한 장소 목록을 제공하는 대화 상자를 표시하고
+                    // 선택한 장소의 마커.
                     openPlacesDialog()
                 } else {
                     Log.e(TAG, "Exception: %s", task.exception)
                 }
             }
         } else {
-            // The user has not granted permission.
+            // 사용자가 권한을 부여하지 않았습니다.
             Log.i(TAG, "The user did not grant location permission.")
 
-            // Add a default marker, because the user hasn't selected a place.
+            // 사용자가 장소를 선택하지 않았기 때문에 기본 마커를 추가합니다.
             map?.addMarker(MarkerOptions()
                 .title(getString(R.string.default_info_title))
                 .position(defaultLocation)
@@ -325,11 +350,11 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_show_current_place]
 
     /**
-     * Displays a form allowing the user to select a place from a list of likely places.
+     * 사용자가 가능한 장소 목록에서 장소를 선택할 수 있는 양식을 표시합니다.
      */
     // [START maps_current_place_open_places_dialog]
     private fun openPlacesDialog() {
-        // Ask the user to choose the place where they are now.
+        // 사용자에게 현재 있는 장소를 선택하도록 요청합니다.
         val listener = DialogInterface.OnClickListener { dialog, which -> // The "which" argument contains the position of the selected item.
             val markerLatLng = likelyPlaceLatLngs[which]
             var markerSnippet = likelyPlaceAddresses[which]
@@ -344,19 +369,20 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                 return@OnClickListener
             }
 
-            // Add a marker for the selected place, with an info window
-            // showing information about that place.
+            // 정보 창과 함께 선택한 장소에 대한 마커를 추가합니다.
+            // 해당 장소에 대한 정보를 표시합니다.
             map?.addMarker(MarkerOptions()
                 .title(likelyPlaceNames[which])
                 .position(markerLatLng)
                 .snippet(markerSnippet))
 
-            // Position the map's camera at the location of the marker.
+
+            // 마커 위치에 지도의 카메라 위치를 지정합니다.
             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng,
                 DEFAULT_ZOOM.toFloat()))
         }
 
-        // Display the dialog.
+        // 대화 상자를 표시합니다.
         AlertDialog.Builder(this)
             .setTitle(R.string.pick_place)
             .setItems(likelyPlaceNames, listener)
@@ -365,7 +391,7 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_open_places_dialog]
 
     /**
-     * Updates the map's UI settings based on whether the user has granted location permission.
+     *    사용자가 위치 권한을 부여했는지 여부에 따라 지도의 UI 설정을 업데이트합니다.
      */
     // [START maps_current_place_update_location_ui]
     @SuppressLint("MissingPermission")
