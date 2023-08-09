@@ -17,7 +17,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.android.volley.BuildConfig
+import androidx.navigation.NavController
+
+import com.example.busandorea.fragment.PlaceDetailsFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -39,6 +41,8 @@ import com.google.android.libraries.places.api.net.PlacesClient
 class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     private var map: GoogleMap? = null
     private var cameraPosition: CameraPosition? = null
+
+    private lateinit var mapController: NavController
 
     // Places API에 대한 진입점입니다.
     private lateinit var placesClient: PlacesClient
@@ -138,6 +142,8 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [START maps_current_place_on_map_ready]
     override fun onMapReady(map: GoogleMap) {
         this.map = map
+//        map.setOnMarkerClickListener(this)
+
 
         // 위치 권한을 확인하고 권한이 있을 경우에만 현재 위치 표시
         getLocationPermission()
@@ -147,14 +153,11 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
             getDeviceLocation()
         }
 
-        // 마커 추가
-
 
 
         // [START_EXCLUDE]
         // [START map_current_place_set_info_window_adapter]
-        // Use a custom info window adapter to handle multiple lines of text in the
-        // info window contents.
+        // 맞춤 정보 창 어댑터를 사용하여 정보 창 내용 핸들링
         this.map?.setInfoWindowAdapter(object : InfoWindowAdapter {
             // Return null here, so that getInfoContents() is called next.
             override fun getInfoWindow(arg0: Marker): View? {
@@ -188,6 +191,20 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     }
     // [END maps_current_place_on_map_ready]
 
+// 마커 클릭시 프래그먼트로 이동
+//    override fun onMarkerClick(marker: Marker): Boolean {
+//
+//        // 마커가 클릭되었을 때 동작을 구현합니다.
+//        if (marker?.title == "나의 현재 위치") {
+//
+//            // 여기에 마커 클릭 시 동작을 작성하세요.
+//            // 예: 프래그먼트 전환 등
+//            val mapController = findNavController(R.id.map)
+//            mapController.navigate(R.id.currentmap_fragment)
+//        }
+//        return true
+//    }
+
     /**
      * 기기의 현재 위치를 가져오고 지도의 카메라 위치를 지정합니다.
      */
@@ -208,6 +225,8 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                         if (lastKnownLocation != null) {
                             // 여기서 LatLng 객체 생성
                             val currentLocation = LatLng(lastKnownLocation!!.latitude, lastKnownLocation!!.longitude)
+
+                            //지도에 마커 추가
                             val marker = map?.addMarker(
                                 MarkerOptions()
                                     .position(currentLocation)
@@ -215,11 +234,12 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                                     .snippet("현재 위치입니다.")
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                             )
-
                             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                 LatLng(lastKnownLocation!!.latitude,
                                     lastKnownLocation!!.longitude), DEFAULT_ZOOM.toFloat()))
-                        }
+
+                            false
+                            }
                     } else {
                         Log.d(TAG, "Current location is null. Using defaults.")
                         Log.e(TAG, "Exception: %s", task.exception)
@@ -228,11 +248,14 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                         map?.uiSettings?.isMyLocationButtonEnabled = false
                     }
                 }
+
             }
         } catch (e: SecurityException) {
-            Log.e("Exception: %s", e.message, e)
+            Log.e("Exception: 위치정보 권한 획득 실패", e.message, e)
         }
     }
+
+
     // [END maps_current_place_get_device_location]
 
     /**
@@ -296,8 +319,8 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
             // Use the builder to create a FindCurrentPlaceRequest.
             val request = FindCurrentPlaceRequest.newInstance(placeFields)
 
-            // Get the likely places - that is, the businesses and other points of interest that
-            // are the best match for the device's current location.
+            // 예상되는 장소를 가져옵니다. 즉, 비즈니스 및 기타 관심 장소를
+            // 기기의 현재 위치와 가장 잘 일치합니다.
             val placeResult = placesClient.findCurrentPlace(request)
             placeResult.addOnCompleteListener { task ->
                 if (task.isSuccessful && task.result != null) {
@@ -380,6 +403,14 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
             // 마커 위치에 지도의 카메라 위치를 지정합니다.
             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng,
                 DEFAULT_ZOOM.toFloat()))
+
+            // 추가 정보를 표시하는 버튼을 대화 상자에 추가합니다.
+            val alertDialog = AlertDialog.Builder(this)
+                .setTitle(R.string.pick_place)
+                .setMessage(markerSnippet)
+                .setPositiveButton(R.string.pick_place) { _,_ ->
+                    showPlaceDetails(likelyPlaceNames[which], markerSnippet)
+                }
         }
 
         // 대화 상자를 표시합니다.
@@ -387,6 +418,22 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
             .setTitle(R.string.pick_place)
             .setItems(likelyPlaceNames, listener)
             .show()
+    }
+    private fun showPlaceDetails(placeName: String?, placeAddress: String?) {
+        val detailsDialog = AlertDialog.Builder(this)
+            .setTitle(placeName) // 선택한 장소의 이름을 다이얼로그 제목으로 설정
+            .setMessage(placeAddress) // 선택한 장소의 주소를 다이얼로그 메시지로 설정
+            .setPositiveButton(android.R.string.ok, null)
+            .create()
+
+        detailsDialog.show()
+
+        // 특정 프래그먼트로 이동하는 로직
+        val fragment = PlaceDetailsFragment.newInstance(placeName,placeAddress)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.currentmap_fragment, fragment)
+            .addToBackStack(null)
+            .commit()
     }
     // [END maps_current_place_open_places_dialog]
 
