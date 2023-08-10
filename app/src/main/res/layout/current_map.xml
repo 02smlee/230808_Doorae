@@ -33,8 +33,19 @@
         android:gravity="left"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <FrameLayout
         android:id="@+id/map_activity"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/outputText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="여기에 결과가 표시됩니다."
+            android:textSize="18sp"
+            tools:ignore="MissingConstraints" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

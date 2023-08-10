@@ -8,10 +8,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat.startActivity
+import androidx.fragment.app.FragmentActivity
 import com.example.busandorea.MapsActivityCurrentPlace
 import com.example.busandorea.R
 import com.example.busandorea.databinding.CurrentMapBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.GoogleMap
 import org.checkerframework.checker.units.qual.C
 import kotlin.math.log
 
@@ -36,6 +41,9 @@ import kotlin.math.log
 // binding 활용 코드의 경우
 class CurrentMap : Fragment() {
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var map: GoogleMap // map 객체 생성하는 코드가 생략됨
+
     private var root_binding: CurrentMapBinding? = null
     private val binding get() = root_binding!!
 
@@ -45,13 +53,15 @@ class CurrentMap : Fragment() {
     ): View {
         root_binding = CurrentMapBinding.inflate(inflater, container, false)
         val rootView = binding.root
+        val inputText = arguments?.getString("inputText")
+        binding.outputText.text = inputText // 전달받은 데이터를 TextView에 설정
 
         binding.btnCurrentmap.setOnClickListener {
             Log.d("smlee","test : 내 현재 위치 지도 click : ${it}")
             startActivity(Intent(requireContext(), MapsActivityCurrentPlace::class.java))
         }
-
         return rootView
+
     }
 
     override fun onDestroyView() {

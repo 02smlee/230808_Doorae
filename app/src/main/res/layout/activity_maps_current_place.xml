@@ -7,4 +7,5 @@
     tools:context=".MapsActivityCurrentPlace"
     android:id="@+id/map_activity">
 
+
 </androidx.constraintlayout.widget.ConstraintLayout>

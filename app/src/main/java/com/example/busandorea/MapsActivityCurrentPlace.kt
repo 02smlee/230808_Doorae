@@ -20,6 +20,8 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 
 import com.example.busandorea.fragment.PlaceDetailsFragment
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -33,9 +35,16 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.PlaceTypes
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 
 /** 사용자의 현재 위치를 구글맵에서 보여주기 */
 class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
@@ -112,7 +121,7 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
     // [END maps_current_place_on_save_instance_state]
 
     /**
-     * Sets up the options menu.
+     * 옵션 메뉴 설정 Sets up the options menu.
      * @param menu The options menu.
      * @return Boolean.
      */
@@ -158,6 +167,7 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
         // [START_EXCLUDE]
         // [START map_current_place_set_info_window_adapter]
         // 맞춤 정보 창 어댑터를 사용하여 정보 창 내용 핸들링
+
         this.map?.setInfoWindowAdapter(object : InfoWindowAdapter {
             // Return null here, so that getInfoContents() is called next.
             override fun getInfoWindow(arg0: Marker): View? {
@@ -234,6 +244,26 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
                                     .snippet("현재 위치입니다.")
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                             )
+
+                            this.map?.setInfoWindowAdapter(object : InfoWindowAdapter {
+                                // Return null here, so that getInfoContents() is called next.
+                                override fun getInfoWindow(arg0: Marker): View? {
+                                    return null
+                                }
+                                override fun getInfoContents(marker: Marker): View {
+                                    // Inflate the layouts for the info window, title and snippet.
+                                    val infoWindow = layoutInflater.inflate(R.layout.custom_info_contents,
+                                        findViewById<FrameLayout>(R.id.map), false)
+                                    val title = infoWindow.findViewById<TextView>(R.id.title)
+                                    title.text = marker.title
+                                    val snippet = infoWindow.findViewById<TextView>(R.id.snippet)
+                                    snippet.text = marker.snippet
+                                    return infoWindow
+                                }
+                            })
+
+
+
                             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                 LatLng(lastKnownLocation!!.latitude,
                                     lastKnownLocation!!.longitude), DEFAULT_ZOOM.toFloat()))
@@ -253,6 +283,76 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
         } catch (e: SecurityException) {
             Log.e("Exception: 위치정보 권한 획득 실패", e.message, e)
         }
+
+        /*Android Google Places 자동 완성 기능
+           * 구글맵 위에 검색시 자동완성
+           * AutocompleteSupportFragment 처리를 위한 fragment를 MapsActivityCurrentPlace.xml에 추가함.
+                <fragment android:id="@+id/autocomplete_fragment"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment" />
+           * */
+
+        //AutocompleteSupportFragment 초기화
+        val autocompleteFragment =
+            supportFragmentManager.findFragmentById(R.id.autocomplete_fragment)
+                    as AutocompleteSupportFragment
+
+        // 반환할 장소 데이터 타입 명시 Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+
+        // 응답을 처리할 PlaceSelectionListener 셋업 Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                // TODO: Get info about the selected place.
+                Log.i(TAG, "Place: ${place.name}, ${place.id}")
+            }
+            override fun onError(status: Status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: $status")
+            }
+        })
+        //자동 완성 기능 여기까지
+
+        /*자동완성으로 키워드 검색식 프로그래매틱 방식으로 장소 예상 검색어 가져오기 (공식문서 아래)
+            https://developers.google.com/maps/documentation/places/android-sdk/autocomplete?hl=ko#option_1_embed_an_autocompletesupportfragment
+        * */
+
+
+        // 자동 완성 세션에 대한 새 토큰을 만든 후 FindAutocompletePredictionsRequest에 전달 /Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
+        // 그리고 예를들어 fetchPlace()를 호출할 때처럼 사용자가 선택할 때 다시 한 번 전달 /and once again when the user makes a selection (for example when calling fetchPlace()).
+        val token = AutocompleteSessionToken.newInstance()
+
+        // 직사각형의 테두리를 지닌 객체 생성 Create a RectangularBounds object.
+        val bounds = RectangularBounds.newInstance(
+            LatLng(-33.880490, 151.184363),
+            LatLng(-33.858754, 151.229596)
+        )
+        // Use the builder to create a FindAutocompletePredictionsRequest.
+        val query = null
+        val request =
+            FindAutocompletePredictionsRequest.builder()
+                // Call either setLocationBias() OR setLocationRestriction().
+                .setLocationBias(bounds)
+                //.setLocationRestriction(bounds)
+                .setOrigin(LatLng(35.156016, 129.059408))
+                .setCountries("KR", "JP")
+                .setTypesFilter(listOf(PlaceTypes.ADDRESS))
+                .setSessionToken(token)
+                .setQuery(query)
+                .build()
+        placesClient.findAutocompletePredictions(request)
+            .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                for (prediction in response.autocompletePredictions) {
+                    Log.i(TAG, prediction.placeId)
+                    Log.i(TAG, prediction.getPrimaryText(null).toString())
+                }
+            }.addOnFailureListener { exception: Exception? ->
+                if (exception is ApiException) {
+                    Log.e(TAG, "Place not found: ${exception.statusCode}")
+                }
+            }
+
     }
 
 
@@ -461,6 +561,8 @@ class MapsActivityCurrentPlace : AppCompatActivity(), OnMapReadyCallback {
         }
     }
     // [END maps_current_place_update_location_ui]
+
+
 
     companion object {
         private val TAG = MapsActivityCurrentPlace::class.java.simpleName
