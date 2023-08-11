@@ -54,7 +54,7 @@ class CurrentMap : Fragment() {
         root_binding = CurrentMapBinding.inflate(inflater, container, false)
         val rootView = binding.root
         val inputText = arguments?.getString("inputText")
-        binding.outputText.text = inputText // 전달받은 데이터를 TextView에 설정
+//        binding.outputText.text = inputText // 전달받은 데이터를 TextView에 설정
 
         binding.btnCurrentmap.setOnClickListener {
             Log.d("smlee","test : 내 현재 위치 지도 click : ${it}")

@@ -50,9 +50,7 @@
 
         <service
             android:name=".MyNavigationService"
-            android:foregroundServiceType="location" />
-
-        <!-- FCM 서비스 -->
+            android:foregroundServiceType="location" /> <!-- FCM 서비스 -->
         <!-- <service -->
         <!-- android:name=".MyFirebaseMessageService" -->
         <!-- android:enabled="true" -->
@@ -77,16 +75,20 @@
             android:name=".AuthActivity"
             android:exported="true" /> <!-- Add -->
         <activity
+            android:name=".TourRegActivity"
+            android:exported="false" />
+        <activity
             android:name=".AddActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".MapsActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_maps" />
         <activity
             android:name=".MapsActivityCurrentPlace"
             android:exported="true" />
+
     </application>
 
 </manifest>

@@ -15,11 +15,11 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.example.busandorea.adapter.myCheckPermission
 import com.example.busandorea.databinding.ActivityMainBinding
 import com.example.busandorea.fragment.CurrentMap
 import com.example.busandorea.fragment.PublicFragment
 import com.example.busandorea.fragment.StampeFragment
-import com.example.busandorea.fragment.TourListFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -50,11 +50,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(view)
 
 
-        //toggle 객체를 이용하여 액션 바를 설정
-//        toggle = ActionBarDrawerToggle(this, binding.drawer, R.string.drawer_opened, R.string.drawer_closed)
-//        binding.drawer.addDrawerListener(toggle)
-//        toggle.syncState()
-
         setSupportActionBar(binding.toolbar)
         toggle = ActionBarDrawerToggle(
             this, binding.drawerLayout, R.string.drawer_opened,
@@ -83,6 +78,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //        }.attach()
 
 
+        //미디어 서버(이미지) 접근 권한 확인
+        myCheckPermission(this)
+
+        binding.fab.setOnClickListener {
+            if(MyApplication.checkAuth()){ //인증이 되면
+                startActivity(Intent(this, TourRegActivity::class.java))
+            }else{
+                Toast.makeText(this@MainActivity, "인증해주세요....", Toast.LENGTH_LONG).show()
+                startActivity(Intent(this, AuthActivity::class.java))
+            }
+        }
+
+
+
         //네비게이션 뷰 사용을 위해 mainDrawerView에 바인딩함.
         //회원가입 바인딩
         binding.mainDrawerView.setNavigationItemSelectedListener {
@@ -96,6 +105,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             true
                 }
             }
+
             // 로그인 바인딩
             when (it.itemId ) {
                 R.id.action_login -> {    // 로그인 버튼을 클릭하면 AuthActivity 엑티비티 화면으로 전환
@@ -104,6 +114,39 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     true}
 
                 else -> {Log.d("smlee","test : item click : ${it.title}")
+                    true
+                }
+            }
+
+            //현재 지도 위치보기
+            // 로그인 바인딩
+            when (it.itemId ) {
+                R.id.action_current_place -> {    // 로그인 버튼을 클릭하면 AuthActivity 엑티비티 화면으로 전환
+                    val intent = Intent(this, MapsActivityCurrentPlace::class.java)
+                    startActivity(intent)
+                    true}
+
+                else -> {Log.d("smlee","test : item click : ${it.title}")
+                    true
+                }
+            }
+
+            // 관광지 등록 바인딩
+            when(it.itemId){
+                R.id.btnRegTour -> {
+                    Toast.makeText(this, "관광지 등록 버튼 클릭", Toast.LENGTH_LONG).show()
+
+//                    val pubFrag : PublicFragment = PublicFragment()
+//                    val manager : FragmentManager = supportFragmentManager
+//                    val transaction : FragmentTransaction = manager.beginTransaction()
+//                    transaction.replace(R.id.viewpager, pubFrag).commit()
+
+                    val intent = Intent(this, TourRegActivity::class.java)
+                    startActivity(intent)
+
+                    true
+                }
+                else -> {Log.d("smlee", "관광지등록 test : item clidk : ${it.title}")
                     true
                 }
             }

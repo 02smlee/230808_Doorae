@@ -18,8 +18,6 @@ import com.google.firebase.auth.GoogleAuthProvider
 class AuthActivity : AppCompatActivity(){
     lateinit var binding: ActivityAuthBinding
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding= ActivityAuthBinding.inflate(layoutInflater)
@@ -74,6 +72,15 @@ class AuthActivity : AppCompatActivity(){
 
         binding.goSignInBtn.setOnClickListener{
             changeVisibility("signin")
+        }
+        // 로그인 후 메인으로 이동 바인딩
+        binding.mainBtn.setOnClickListener {
+            if(MyApplication.checkAuth()){ //인증이 되면
+                startActivity(Intent(this, MainActivity::class.java))
+            }else{
+                Toast.makeText(this, "인증해주세요....", Toast.LENGTH_LONG).show()
+                startActivity(Intent(this, AuthActivity::class.java))
+            }
         }
 
         binding.googleLoginBtn.setOnClickListener {
@@ -166,6 +173,7 @@ class AuthActivity : AppCompatActivity(){
                 // 뷰를 show & hide
                 // 로그아웃 버튼은 보이게
                 logoutBtn.visibility= View.VISIBLE
+                mainBtn.visibility= View.VISIBLE
                 // 회원가입 버튼 안보이게
                 goSignInBtn.visibility= View.GONE
                 googleLoginBtn.visibility= View.GONE

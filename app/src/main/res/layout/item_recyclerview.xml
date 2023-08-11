@@ -8,12 +8,32 @@
     android:padding="16dp"
     android:layout_margin="8dp">
 
-    <TextView
-        android:id="@+id/item_data"
-        android:layout_width="0dp"
-        android:layout_weight="1"
+    <ImageView
+        android:id="@+id/itemImageView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="16dp"
-        />
+        android:orientation="vertical"
+        android:layout_marginLeft="10sp">
+        <TextView
+            android:id="@+id/itemMainTitle"
+            android:layout_width="200dp"
+            android:layout_height="30dp"
+            android:textStyle="bold"
+            android:textSize="16dp"
+            android:hint="메인 제목 확인"
+            android:layout_marginBottom="10sp"/>
+        <TextView
+            android:id="@+id/itemTitle"
+            android:layout_width="200dp"
+            android:layout_height="30dp"
+            android:textStyle="bold"
+            android:textSize="16dp"
+            android:hint="서브 제목 확인" />
+    </LinearLayout>
+
+
 </LinearLayout>

@@ -28,30 +28,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        // SupportMapFragment를 가져오고 지도를 사용할 준비가 되면 알림 받기/ Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // 클릭 이벤트 처리
+        // 클릭 후 프레그먼트 전환 이벤트 처리
         binding.btnOnMap.setOnClickListener {
             val inputText = binding.messageEdit.text.toString()
             Log.d("smlee","버튼 클릭")
 
-            // CurrentMap 프래그먼트로 전달할 데이터를 번들에 담습니다.
+            // CurrentMap 프래그먼트로 전달할 데이터를 번들에 담기.
             val bundle = Bundle()
             bundle.putString("inputText", inputText)
 
-            // CurrentMap 프래그먼트를 생성하고 번들을 전달합니다.
+            // CurrentMap 프래그먼트를 생성하고 번들을 전달.
             val currentMapFragment = CurrentMap()
             currentMapFragment.arguments = bundle
 
-            // CurrentMap 프래그먼트를 화면에 추가합니다.
+            // CurrentMap 프래그먼트를 화면에 추가.
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, currentMapFragment)
                 .commit()
         }
-
     }
 
     /**
