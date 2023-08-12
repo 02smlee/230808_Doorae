@@ -24,25 +24,25 @@
         android:layout_marginTop="20dp" />
 
 
-    <Button
-        android:id="@+id/btn_onMap"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right|top"
-        android:layout_marginTop="70dp"
-        android:layout_marginRight="10dp"
-        android:text="저장"
-        android:textColor="@color/black"/>
+<!--    <Button-->
+<!--        android:id="@+id/btnOnMap"-->
+<!--        android:layout_width="60dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="right|top"-->
+<!--        android:layout_marginTop="70dp"-->
+<!--        android:layout_marginRight="10dp"-->
+<!--        android:text="여기 등록"-->
+<!--        android:textColor="@color/black"/>-->
 
-    <EditText
-        android:id="@+id/message_edit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:layout_marginTop="80dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="80dp"
-        android:hint="여기가 부산의 명소인 이유를 알려주세요"
-        />
+<!--    <EditText-->
+<!--        android:id="@+id/message_edit"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@color/white"-->
+<!--        android:layout_marginTop="80dp"-->
+<!--        android:layout_marginLeft="10dp"-->
+<!--        android:layout_marginRight="80dp"-->
+<!--        android:hint="여기가 부산의 명소인 이유를 알려주세요"-->
+<!--        />-->
 
 </FrameLayout>

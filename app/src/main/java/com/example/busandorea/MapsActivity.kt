@@ -1,8 +1,10 @@
 package com.example.busandorea
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.core.content.ContentProviderCompat.requireContext
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -28,33 +30,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // SupportMapFragment를 가져오고 지도를 사용할 준비가 되면 알림 받기/ Obtain the SupportMapFragment and get notified when the map is ready to be used.
+//        binding.btnOnMap.setOnClickListener {
+//            Log.d("smlee","test : btn_OnMap click : ${it}")
+//            startActivity(Intent(this, TourRegActivity::class.java))
+//        }
         val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+            .findFragmentById(R.id.onMap) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-        // 클릭 후 프레그먼트 전환 이벤트 처리
-        binding.btnOnMap.setOnClickListener {
-            val inputText = binding.messageEdit.text.toString()
-            Log.d("smlee","버튼 클릭")
-
-            // CurrentMap 프래그먼트로 전달할 데이터를 번들에 담기.
-            val bundle = Bundle()
-            bundle.putString("inputText", inputText)
-
-            // CurrentMap 프래그먼트를 생성하고 번들을 전달.
-            val currentMapFragment = CurrentMap()
-            currentMapFragment.arguments = bundle
-
-            // CurrentMap 프래그먼트를 화면에 추가.
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, currentMapFragment)
-                .commit()
-        }
     }
 
     /**
      * Manipulates the map once available.
+     *
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
      * we just add a marker near Sydney, Australia.

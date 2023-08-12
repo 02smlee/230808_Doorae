@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import com.example.busandorea.MapsActivityCurrentPlace
 import com.example.busandorea.R
+import com.example.busandorea.TourRegActivity
 import com.example.busandorea.databinding.CurrentMapBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -59,6 +60,11 @@ class CurrentMap : Fragment() {
         binding.btnCurrentmap.setOnClickListener {
             Log.d("smlee","test : 내 현재 위치 지도 click : ${it}")
             startActivity(Intent(requireContext(), MapsActivityCurrentPlace::class.java))
+        }
+
+        binding.btnOnMap.setOnClickListener {
+            Log.d("smlee","test : btn_OnMap click : ${it}")
+            startActivity(Intent(requireContext(), TourRegActivity::class.java))
         }
         return rootView
 

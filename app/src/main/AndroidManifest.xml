@@ -48,9 +48,10 @@
             android:name="com.google.firebase.message.default_notification_channel_id"
             android:value="fcm_default_channel" />
 
-        <service
-            android:name=".MyNavigationService"
-            android:foregroundServiceType="location" /> <!-- FCM 서비스 -->
+<!--        <service-->
+<!--            android:name=".MyNavigationService"-->
+<!--            android:foregroundServiceType="location" />-->
+        <!-- FCM 서비스 -->
         <!-- <service -->
         <!-- android:name=".MyFirebaseMessageService" -->
         <!-- android:enabled="true" -->
@@ -76,10 +77,10 @@
             android:exported="true" /> <!-- Add -->
         <activity
             android:name=".TourRegActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".AddActivity"
-            android:exported="true"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".MapsActivity"

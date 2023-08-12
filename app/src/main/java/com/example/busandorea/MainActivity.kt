@@ -158,25 +158,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
 
-            R.id.action_login-> {
+            R.id.menu_main_auth-> {
                 // 로그인 버튼을 클릭하면 AuthActivity 화면으로 전환
                 val intent = Intent(this, AuthActivity::class.java)
                 startActivity(intent)
                 true
             }
-//            R.id.stampfragment -> {
-//                replaceFragment(StampeFragment())
-//                return true
-//            }
             else -> super.onOptionsItemSelected(item)
         }
     }
-//    private fun replaceFragment(fragment: Fragment) {
-//        supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, fragment)
-//            .addToBackStack(null)
-//            .commit()
-//    }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
